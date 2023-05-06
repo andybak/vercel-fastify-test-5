@@ -1,42 +1,25 @@
-import fastify from "fastify";
-import fastifyEnv from "@fastify/env";
-import fastifyStatic from "@fastify/static";
-import pino from "pino";
-import pinoPretty from "pino-pretty";
+const path = require("path");
+const fastify = require("fastify")({logger: false,});
+const multiavatar = require('@multiavatar/multiavatar')
 
-import rootRouter from "./routes/root";
-import path from "path";
+fastify.get('/', function (request, reply) {
+  var name = request.query.name;
+  if (name==="" || name===undefined) {
+    name = Math.random();
+  }
+  let svgCode = multiavatar(name);
+  reply
+    .code(200)
+    .header('Content-Type', 'image/svg+xml; charset=utf-8')
+    .send(svgCode)
+})
 
-export const createApp = () => {
-  const logger = pino(pinoPretty());
-  const app = fastify({
-    logger,
-  });
-
-  const schema = {
-    type: "object",
-    required: ["PORT"],
-    properties: {
-      PORT: {
-        type: "string",
-        default: 3000,
-      },
-    },
-  };
-
-  app.register(fastifyEnv, {
-    confKey: "config",
-    schema,
-    data: process.env,
-  });
-
-  app.register(fastifyStatic, {
-    root: path.join(__dirname, "public"),
-    index: false,
-    list: true,
-  });
-
-  app.register(rootRouter);
-
-  return app;
-};
+fastify.listen(
+  { port: process.env.PORT, host: "0.0.0.0" },
+  function (err, address) {
+    if (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  }
+);
