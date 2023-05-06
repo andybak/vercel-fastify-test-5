@@ -1,4 +1,4 @@
-mport * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 dotenv.config();
 
 import Fastify from "fastify";
