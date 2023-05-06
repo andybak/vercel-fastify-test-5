@@ -1,15 +1,15 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createApp } from "../src/app";
+mport * as dotenv from "dotenv";
+dotenv.config();
 
-const app = createApp();
+import Fastify from "fastify";
 
-app.get("/ping2", async (_request, reply) => {
-  return reply.send("pong2");
+const app = Fastify({
+  logger: true,
 });
 
-const handler = async (req: VercelRequest, res: VercelResponse) => {
-  await app.ready();
-  app.server.emit("request", req, res);
-};
+app.register(import("../src/app"));
 
-export default handler;
+export default async (req, res) => {
+    await app.ready();
+    app.server.emit('request', req, res);
+}
